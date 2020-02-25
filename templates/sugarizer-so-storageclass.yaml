@@ -1,0 +1,29 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sugarizer-slow-storage-{{required "schoolShortName not defined" .Values.schoolShortName}}
+provisioner: kubernetes.io/gce-pd
+reclaimPolicy: Delete
+parameters:
+  type: pd-standard
+  zone: {{required "region not defined" .Values.region}}
+volumeBindingMode: Immediate
+allowVolumeExpansion: True
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: sugarizer-disk-{{required "schoolShortName not defined" .Values.schoolShortName}}
+ namespace: sugarizer-{{required "schoolShortName not defined" .Values.schoolShortName}}
+ annotations:
+   volume.beta.kubernetes.io/storage-class: sugarizer-slow-storage-{{required "schoolShortName not defined" .Values.schoolShortName}}
+spec:
+ storageClassName: sugarizer-slow-storage-{{required "schoolShortName not defined" .Values.schoolShortName}}
+ accessModes:
+  - ReadWriteOnce
+ resources:
+   requests:
+     storage: 10Gi
+
